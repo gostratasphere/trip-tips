@@ -115,7 +115,8 @@ function addReminder(auth, event) {
   var reminder = {
     summary: "Pack for your trip",
     location: "Home",
-    description: "An easy packing list for your upcoming flight.",
+    description:
+      "An easy packing list for your upcoming trip. https://gostratasphere.github.io/trip-tips/",
     start: {
       dateTime: reminderTime,
       timeZone: event.timeZone
@@ -125,6 +126,10 @@ function addReminder(auth, event) {
       timeZone: event.timeZone
     },
     // recurrence: ["RRULE:FREQ=DAILY;COUNT=2"],
+    // attendees: [
+    //   { email: "test1@gmail.com" },
+    //   { email: "test2@gmail.com" }
+    // ],
     reminders: {
       useDefault: false,
       overrides: [

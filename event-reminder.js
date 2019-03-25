@@ -1,13 +1,16 @@
 const fs = require("fs");
 const readline = require("readline");
 const { google } = require("googleapis");
+const moment = require("moment");
+moment().format();
 
 // If modifying these scopes, delete token.json.
-const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
+const SCOPES = ["https://www.googleapis.com/auth/calendar.events"];
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
 const TOKEN_PATH = "token.json";
+console.log("Let's do this!");
 
 // Load client secrets from a local file.
 fs.readFile("credentials.json", (err, content) => {
@@ -89,15 +92,62 @@ function listEvents(auth) {
       const events = res.data.items;
       if (events.length) {
         console.log("Upcoming 10 events:");
-        events.map((event, i) => {
+        return events.map((event, i) => {
           const start = event.start.dateTime || event.start.date;
           const kind = event.kind;
           console.log(`${start} - ${event.summary}`);
-          console.log(`Kind - ${kind}`);
+          console.log("Adding reminder for event 24 hours before!");
+          addReminder(auth, event);
         });
       } else {
         console.log("No upcoming events found.");
       }
+    }
+  );
+}
+
+function addReminder(auth, event) {
+  const calendar = google.calendar({ version: "v3", auth });
+  var eventTime = moment(event.start.dateTime);
+  var reminderTime = moment(eventTime).subtract(1, "days");
+  var reminderEndTime = moment(reminderTime).add(1, "hour");
+
+  var reminder = {
+    summary: "Pack for your trip",
+    location: "Home",
+    description: "An easy packing list for your upcoming flight.",
+    start: {
+      dateTime: reminderTime,
+      timeZone: event.timeZone
+    },
+    end: {
+      dateTime: reminderEndTime,
+      timeZone: event.timeZone
+    },
+    // recurrence: ["RRULE:FREQ=DAILY;COUNT=2"],
+    reminders: {
+      useDefault: false,
+      overrides: [
+        { method: "email", minutes: 24 * 60 },
+        { method: "popup", minutes: 10 }
+      ]
+    }
+  };
+
+  calendar.events.insert(
+    {
+      auth: auth,
+      calendarId: "primary",
+      resource: reminder
+    },
+    function(err, reminder) {
+      if (err) {
+        console.log(
+          "There was an error contacting the Calendar service: " + err
+        );
+        return;
+      }
+      console.log("Event created: %s", reminder.htmlLink);
     }
   );
 }

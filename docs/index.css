@@ -1,0 +1,11 @@
+body {
+  background-image: url('./assets/plane-wing-blue-argentina.jpeg');
+  -webkit-background-size: cover;
+  -moz-background-size: center cover;
+  background-size: cover;
+  background-position: center top;
+}
+
+.jumbotron {
+  margin-top: 20%;
+}
